@@ -3,7 +3,7 @@
 % Single Column Format
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[11pt, a4paper]{article}
+\documentclass[10pt, a4paper]{article}
 
 % --- PACKAGE SETUP ---
 \usepackage[utf8]{inputenc} % For handling text encoding
@@ -64,28 +64,30 @@
 \begin{titlepage}
     \centering
     \vspace*{\stretch{1.0}}
-    {\Huge \bfseries A Study and Comparative Analysis of Key Research in \\ \vspace{0.5em} \LARGE Your Topic Area \par}
+    {\Huge \bfseries A Study and Comparative Analysis of Key Research in \\ \vspace{0.5em} \LARGE From Team Centrality to Energy-Efficient Network Control \par}
     \vspace{2cm}
-    {\Large Your Name \\ \texttt{your.email@university.edu} \par}
+    {\Large Srinjoy Chakraborty \\ 
+    251040638\\
+    \texttt{srinjoyc25@iitk.ac.in} \par}
     \vspace{1cm}
     
     A report submitted in partial fulfillment of the requirements for the course
     \\[0.5cm]
-    {\large \bfseries Your Course Code: Your Course Name}
+    {\large \bfseries EE698V: Graph Theory}
     \\[1cm]
     
     Submitted to:
     \\
-    {\large Prof. Professor's Name}
+    {\large Prof. Twinkle Tripathy}
     
     \vspace{1cm}
     {\large \includegraphics[width=0.3\textwidth]{redlogo.jpg}} % Optional: Add your university logo
     \\[1cm]
-    {\large Department of Your Department}
+    {\large Electrical Engineering}
     \\
-    {\large Your University Name}
+    {\large Indian Institute of Technology, Kanpur}
     \\
-    {\large City, Country}
+    {\large Kanpur, Uttar Pradesh, India}
     \\[1cm]
     
     {\large \today \par}
@@ -99,19 +101,113 @@
 % --- MAIN REPORT SECTIONS ---
 
 \section{Introduction}
-This section should set the stage for your report.
+
+\subsection*{Background}
+The study of complex networks is a cornerstone of modern graph theory, providing a mathematical framework to understand systems ranging from social collaborations to biological processes and engineered infrastructures. A central challenge in this field is to move beyond simple topological descriptions to a deeper understanding of how a network's structure governs its dynamic behavior and function. Classical graph metrics often fall short in capturing the nuances of real-world systems, which frequently involve higher-order interactions (i.e., groups or teams) and are subject to external control. This necessitates the development of more sophisticated analytical tools that can accurately model group influence and quantify the practical costs associated with controlling network dynamics.
+
+\subsection*{Problem Statement and Objective}
+The goal of this report is to analyze, compare, and synthesize the findings of three key research papers that bridge the gap between structural graph theory and the control of complex networks. We explore the evolution of centrality measures from individuals to teams, the connection between network topology and the energetic cost of control, and the role of fundamental matrix properties in designing optimal control strategies. By examining these works in concert, we aim to build a cohesive narrative from the problem of measuring influence to the challenge of implementing it efficiently.
+
+\subsection*{Introduction to the Papers}
+The report focuses on the following three papers:
+\begin{enumerate}
+    \item \textbf{Lee et al. (2021), ``Betweenness centrality of teams in social networks'':} This paper addresses the limitation of classical centrality measures by extending the concept of betweenness centrality from individual nodes to teams. It introduces a weighted hypergraph model that accurately represents group collaborations and reveals that team influence is a complex function of both performance and the structural embedding of its members.
+    
+    \item \textbf{Bof et al. (2017), ``On the Role of Network Centrality in the Controllability of Complex Networks'':} This work moves beyond the binary concept of controllability to analyze the energy required for control. It establishes a formal link between a network's energetic controllability and its structural heterogeneity, as measured by the distribution of eigenvector centrality. This leads to a powerful distinction between ``isotropic'' (homogeneous, hard to control) and ``anisotropic'' (heterogeneous, easier to control) networks.
+    
+    \item \textbf{Lindmark \& Altafini (2021), ``Centrality Measures and the Role of Non-Normality for Network Control Energy Reduction'':} This paper resolves the conflict between different control energy metrics by introducing network non-normality as a unifying principle. It defines novel centrality measures for a node's influence ($p_i$) versus its reachability ($q_i$) and shows that their imbalance provides a robust and effective strategy for selecting optimal driver nodes.
+\end{enumerate}
+
+\subsection*{Structure of the Report}
+Section 2 of this report provides a detailed summary and analysis of the hypergraph centrality model. Section 3 explores the link between network centrality and energetic controllability. Section 4 delves into the role of non-normality for optimal driver node selection. Section 5 presents a comparative analysis, synthesizing the key themes across the three works, and Section 6 concludes the report.
+
+
+\section{Introduction: The Limits of Pairwise Centrality}
+The classical measure of a node's influence as a communication broker is its vertex betweenness centrality (v-BC) :
+\begin{equation}
+    B(v_i) = \sum_{s \neq v_i \neq t} \frac{\sigma_{st}(v_i)}{\sigma_{st}}
+\end{equation}
+where $\sigma_{st}$ is the number of shortest paths between nodes $s$ and $t$. This definition, however, is fundamentally node-centric. In many real-world social networks, the primary unit of interaction is not an individual, but a team.
+
+A standard graph model $G=(\mathcal{V}, \mathcal{E})$ with $\mathcal{E} \subseteq [\mathcal{V}]^2$ fails to capture this. A single team collaboration (a hyperedge $h \subseteq \mathcal{V}$) and a set of all pairwise interactions between its members (the edge set of a clique, $[h]^2$) are indistinguishable, as both project to a $K_{|h|}$ subgraph. This representational ambiguity necessitates a more expressive framework.
+
+\subsection{Methodology: Hyperedge Betweenness Centrality (h-BC)}
+
+\paragraph{\textbf{Hypergraph Representation:}}
+To accurately model group interactions, the network is represented as a hypergraph $\mathcal{H} = (\mathcal{V}, \mathcal{E})$, where $\mathcal{V}$ is the set of individuals and $\mathcal{E}$ is a multiset of hyperedges, each representing a team.
+
+\subsubsection{Bipartite Graph Projection}
+\label{{sec:projection}}
+The core analytical tool is the projection of the hypergraph onto a bipartite graph $\mathcal{G}_B = (\mathcal{V} \cup \mathcal{E}, E_B)$. The two partitions of the vertex set are the individuals ($\mathcal{V}$) and the teams-as-nodes ($\mathcal{E}$). The edge set is formally defined as:
+\begin{equation}
+    E_B = \{ \{v, e\} \mid v \in \mathcal{V}, e \in \mathcal{E}, \text{ and } v \in e \}
+\end{equation}
+This structure provides a tractable model for applying pathfinding algorithms.
+
+\subsubsection{Weighted Shortest Paths}
+A path between two individuals $s,t \in \mathcal{V}$ is an alternating sequence of nodes from $\mathcal{V}$ and $\mathcal{E}$ in $\mathcal{G}_B$. In an unweighted model, the sheer number of such paths dilutes centrality scores, masking the influence hierarchy. To resolve this, a cost $c_i$ is assigned to each hyperedge $e_i$. The paper explores two performance metrics for weighting:
 \begin{itemize}
-    \item \textbf{Background:} Start with a broad introduction to the research area. Explain why this topic is important and relevant.
-    \item \textbf{Problem Statement/Objective:} Clearly state the objective of your report. For example: "The goal of this report is to analyze, compare, and synthesize the findings of three key papers on [Your Topic] to understand the primary challenges and proposed solutions."
-    \item \textbf{Introduction to the Papers:} Briefly introduce the three papers you will be discussing. Mention the author(s), year, and the main contribution of each.
-    \item \textbf{Structure of the Report:} Outline the structure of the rest of your document (e.g., "Section 2 provides a detailed summary of each paper... Section 3 presents a comparative analysis... and Section 4 concludes the report.").
+    \item \textbf{Team Performance ($u_i$):} An empirical value, e.g., the number of articles a team published.
+    \item \textbf{Performance per Member ($w_i$):} A normalized value, $w_i = u_i / |e_i|$.
+\end{itemize}
+The cost is the inverse of a performance metric, e.g., $c_i = 1/u_i$. A shortest path is one that minimizes the total cost, $L(P_{st}) = \sum_{e_i \in P_{st}} c_i$.
+
+\subsubsection{Formal Definition of h-BC}
+The Hyperedge Betweenness Centrality (h-BC) of a team $e$ is its betweenness centrality score within the weighted bipartite graphr or its the projection of the bipartitte graph as discussed in section \ref{sec: projection} $\mathcal{G}_B$:
+\begin{equation}
+    B_H(e) = \sum_{s,t \in \mathcal{V}, s \neq t} \frac{\sigma_{st}(e)}{\sigma_{st}}
+\end{equation}
+where $\sigma_{st}$ is the number of shortest-cost paths. 
+\subsection{Citation network vs Hypergraph}
+\paragraph{Why betweenness centrality matters more than degree centrality here:} 
+First, it's important to clarify that our model is a co-authorship network, where authors are nodes and papers are hyperedges. This is different from a basic citation network, where nodes are papers.
+
+In this co-authorship model, betweenness centrality and degree centrality measure fundamentally different things and answer different questions.
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{hypergraph.png}
+    \caption{Hypergraph Model}
+    \label{fig:hypergraph}
+\end{figure}
+\begin{itemize}
+    \item What Each Metric Measures in our Authorship Model
+    \begin{itemize}
+    \item \textbf{Hyperdegree Centrality (Degree Centrality):}
+This measures the number of collaborations an individual author is involved in. It is a local measure of an author's activity or collaborative breadth. In our example:
+Node 2 is the most degree-central author with a hyperdegree of 3.
+This tells us that Author 2 is the most active collaborator.
+    \item \textbf{Hyperedge Betweenness Centrality (h-BC):}
+This measures how often a team (i.e., a paper) lies on the most efficient paths for information to flow between all pairs of authors in the network. It is a global measure of a collaboration's importance as a bridge. In our example, the team $h_2=1,4,5$ is the most central.
+\end{itemize}
+    \item \textbf{Why not just use degree centrality?}
+Knowing that Author 2 is the most active collaborator (highest degree) is useful, but it doesn't tell us which of their projects was the most impactful for the network's cohesion. It can't distinguish team importance: Does Author 2's presence make team $h_0, h_1, or  h_4$ the most important bridge? Degree centrality alone cannot answer this. It assigns importance to the person, not the project.It's a poor proxy for bridge-like roles: A high-degree node might connect many people who are already well-connected to each other. This makes the node an active hub, but not necessarily a critical bridge between otherwise disconnected communities.
+    \item \textbf{Why betweenness centrality is the right tool for this?}
+Science and collaboration are not just about individual activity; they are about the synthesis and transfer of ideas between different groups. Betweenness centrality is the only measure that directly quantifies this role.
+In your specific example, betweenness centrality correctly identified that the collaboration $h_2=1,4,5$ is the most influential. Why? Because it serves as an essential intellectual bridge. Author 1 is from the orbit of team $h_0$, Author 4 is from team $h_1$, and Author 5 is from team $h_3$.
+The project $h_2$ is the one and only place where these three distinct research clusters are directly and efficiently linked.
+Degree centrality would have missed this completely. It would have pointed to Author 2, but it wouldn't have revealed that the specific project $h_2$ was the most critical event for the overall cohesion and information flow of the entire research community.
+
 \end{itemize}
 
-\section{Summary of Research Papers}
-In this section, you will dedicate a subsection to each paper. The goal is to summarize each one accurately and concisely.
 
 
-\subsection{The limits of Classical Controlability}
+
+
+
+
+
+
+
+
+% \section{Conclusion}
+% The hypergraph betweenness centrality provides a necessary and powerful extension to classical network theory. By accurately modeling group interactions and employing a weighted pathfinding approach, it successfully quantifies the influence of teams as single, cohesive entities. The framework reveals that team influence is a nuanced property, emerging from an interplay between the team's performance, its structural position as a bridge, and the connectivity of its individual members. This methodology offers a more realistic tool for analyzing a wide range of social, biological, and technological systems where collaboration is key.
+
+
+
+
+\section{The limits of Classical Controlability}
 The classical notion of controllability mainly dwells in a binary approach: a network is either controllable or not! This approach however, is often based on structural controllability, which is trivial for determining the minimum number of control nodes to ensure control is theoretically as well as practically possible. A network may be controllable on paper but require physically unrealizable amounts of energy, making it "practically uncontrollable". The goal of this research was to establish a formal link between the network's graphical topology and this control energy cost.
 \subsubsection{Control Energy Shift}
 They modeled the network as a discrete-time Linear Time-Invariant (LTI) system :
@@ -176,13 +272,13 @@ The main result from provides a direct link between the network's structural pro
 
 This bound shows that control difficulty depends on the anisotropy ratio (the first term, measuring structural imbalance) and the spectral properties of the network (the second term, related to the mixing rate).
 \subsubsection{Case of Reversible Matrices}
-The interpretation becomes even more concrete for the subclass of **reversible** stochastic matrices. A stochastic matrix is reversible if it satisfies $A=A^R$, where $A^R$ is the time-reversal matrix defined in Equation \ref{eq:ar}. This class includes the transition matrices of random walks on undirected graphs \cite{552}.
+The interpretation becomes even more concrete for the subclass of reversible stochastic matrices. A stochastic matrix is reversible if it satisfies $A=A^R$, where $A^R$ is the time-reversal matrix defined in Equation \ref{eq:ar}. This class includes the transition matrices of random walks on undirected graphs.
 
-For a random walk on an undirected graph with a symmetric adjacency matrix $C$, the transition matrix is $A=CD^{-1}$. In this case, the eigenvector centrality $v_i$ is directly proportional to the weighted degree of the node \cite{580-581}:
+For a random walk on an undirected graph with a symmetric adjacency matrix $C$, the transition matrix is $A=CD^{-1}$. In this case, the eigenvector centrality $v_i$ is directly proportional to the weighted degree of the node:
 \begin{equation}
     v_i = \frac{C_{i}^{\text{col}}}{C_{\text{tot}}} = \frac{\sum_{j}C_{ji}}{\sum_{i,j}C_{ij}}
 \end{equation}
-This establishes a direct link between the abstract eigenvector centrality and the simple, intuitive graph property of node degree. Consequently, the heterogeneity index simplifies to the ratio of the maximum to minimum degree \cite{582-583}:
+This establishes a direct link between the abstract eigenvector centrality and the simple, intuitive graph property of node degree. Consequently, the heterogeneity index simplifies to the ratio of the maximum to minimum degree:
 \begin{equation}
     \frac{v_{\max}}{v_{\min}} = \frac{\max_{i}\{C_{i}^{\text{col}}\}}{\min_{i}\{C_{i}^{\text{col}}\}}
 \end{equation}
@@ -204,7 +300,7 @@ The paper's analysis is entirely dependent on these guarantees:
 \end{itemize}
 
 In essence, the Perron-Frobenius theorem provides the necessary starting point, allowing the authors to confidently extract well-defined centrality vectors from the network's structure, which is the first and most critical step in their entire analysis of control energy.
-\subsection{From $\sigma_2$ to the Controllability Metric ($\lambda_{\min}(W)$)}
+\subsubsection{From $\sigma_2$ to the Controllability Metric ($\lambda_{\min}(W)$)}
 This final step connects the structural parameter $\sigma_2$ to the ultimate measure of control difficulty using the paper's main theorem \ref{eq:main_bound}.
 We begin with the paper's Theorem 1 \ref{eq:main_bound}, which states that the controllability metric is constrained by an upper bound involving $\sigma_2$. For the case of an undirected graph (where the anisotropy ratio becomes the heterogeneity index), the bound is:
 \begin{equation}
@@ -241,7 +337,7 @@ Both of these effects push the upper bound on $\lambda_{\min}(W)$ higher. A high
 \paragraph{Inference from the Simulation Result}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\linewidth]{sim.png}
+    \includegraphics[width=1\linewidth]{sim.png}
     \caption{Upperbound and cohesion relation}
     \label{fig:sim_result}
 \end{figure}
@@ -267,9 +363,8 @@ Node-level non-normality is then the imbalance between these two:
     r_{\text{diff},i} = p_i - q_i \quad 
 \end{equation}
 
-\section{Case Study: Optimal Driver Node Selection}
-We now apply this theory to the 6-node network from Figure , implemented by the Python code .
-\section{Case Study: Optimal Driver Node Selection}
+
+\subsection{Case Study: Optimal Driver Node Selection}
 We now apply this theory to the 6-node network from Figure , implemented by the Python code .
 
 % \begin{figure}[H]
@@ -281,7 +376,7 @@ We now apply this theory to the 6-node network from Figure , implemented by the 
 
 \begin{table}[H]
     \centering
-    \caption{Centrality and Non-Normality Measures for the 6-Node Network {2052-2086}.}
+    \caption{Centrality and Non-Normality Measures for the 6-Node Network.}
     \label{tab:centrality_case_study}
     \begin{tabular}{@{}ccccc@{}}
         \toprule
@@ -308,103 +403,63 @@ We now apply this theory to the 6-node network from Figure , implemented by the 
     \end{tabular}
 \end{table}
 
-The results in Table \ref{tab:performance_case_study} are stark. The naive strategy of maximizing influence ($\mathcal{K}_{Tr}=\{2,4\}$) fails catastrophically, rendering the system uncontrollable ($\lambda_{\min}=0$) because it neglects the root node (Node 1) {2123-2124]. The non-normality strategies succeed by selecting nodes with high imbalance (like Node 1), ensuring controllability and providing a robust trade-off between average and worst-case energy.
+The results in Table \ref{tab:performance_case_study} are stark. The naive strategy of maximizing influence ($\mathcal{K}_{Tr}=\{2,4\}$) fails catastrophically, rendering the system uncontrollable ($\lambda_{\min}=0$) because it neglects the root node (Node 1). The non-normality strategies succeed by selecting nodes with high imbalance (like Node 1), ensuring controllability and providing a robust trade-off between average and worst-case energy.
 
-\section{Conclusion}
-The research presented provides a powerful narrative, moving from the abstract spectral properties of a network's adjacency matrix to a practical, effective strategy for control. The key insight is that the structural heterogeneity of a network, quantifiable via centrality measures, directly governs the energy required for its control. The concept of non-normality provides a unifying principle that resolves the conflict between competing energy metrics, leading to robust driver node selection strategies. This work elegantly demonstrates how deep concepts from graph theory are essential for solving complex problems in the engineering of networked systems.
-
-\section{Introduction: The Limits of Pairwise Centrality}
-The classical measure of a node's influence as a communication broker is its vertex betweenness centrality (v-BC) \cite{1359-1360}:
-\begin{equation}
-    B(v_i) = \sum_{s \neq v_i \neq t} \frac{\sigma_{st}(v_i)}{\sigma_{st}}
-\end{equation}
-where $\sigma_{st}$ is the number of shortest paths between nodes $s$ and $t$. This definition, however, is fundamentally node-centric. In many real-world social networks, the primary unit of interaction is not an individual, but a team.
-
-A standard graph model $G=(\mathcal{V}, \mathcal{E})$ with $\mathcal{E} \subseteq [\mathcal{V}]^2$ fails to capture this. A single team collaboration (a hyperedge $h \subseteq \mathcal{V}$) and a set of all pairwise interactions between its members (the edge set of a clique, $[h]^2$) are indistinguishable, as both project to a $K_{|h|}$ subgraph. This representational ambiguity necessitates a more expressive framework.
-
-\section{Methodology: Hyperedge Betweenness Centrality (h-BC)}
-
-\subsection{Hypergraph Representation}
-To accurately model group interactions, the network is represented as a hypergraph $\mathcal{H} = (\mathcal{V}, \mathcal{E})$, where $\mathcal{V}$ is the set of individuals and $\mathcal{E}$ is a multiset of hyperedges, each representing a team \cite{1362}.
-
-\subsection{Bipartite Graph Projection}
-The core analytical tool is the projection of the hypergraph onto a bipartite graph $\mathcal{G}_B = (\mathcal{V} \cup \mathcal{E}, E_B)$. The two partitions of the vertex set are the individuals ($\mathcal{V}$) and the teams-as-nodes ($\mathcal{E}$). The edge set is formally defined as:
-\begin{equation}
-    E_B = \{ \{v, e\} \mid v \in \mathcal{V}, e \in \mathcal{E}, \text{ and } v \in e \}
-\end{equation}
-This structure provides a tractable model for applying pathfinding algorithms.
-
-\subsection{Weighted Shortest Paths}
-A path between two individuals $s,t \in \mathcal{V}$ is an alternating sequence of nodes from $\mathcal{V}$ and $\mathcal{E}$ in $\mathcal{G}_B$. In an unweighted model, the sheer number of such paths dilutes centrality scores, masking the influence hierarchy. To resolve this, a cost $c_i$ is assigned to each hyperedge $e_i$. The paper explores two performance metrics for weighting:
-\begin{itemize}
-    \item \textbf{Team Performance ($u_i$):} An empirical value, e.g., the number of articles a team published.
-    \item \textbf{Performance per Member ($w_i$):} A normalized value, $w_i = u_i / |e_i|$.
-\end{itemize}
-The cost is the inverse of a performance metric, e.g., $c_i = 1/u_i$. A shortest path is one that minimizes the total cost, $L(P_{st}) = \sum_{e_i \in P_{st}} c_i$ \cite{1785}.
-
-\subsection{Formal Definition of h-BC}
-The Hyperedge Betweenness Centrality (h-BC) of a team $e$ is its betweenness centrality score within the weighted bipartite graph $\mathcal{G}_B$:
-\begin{equation}
-    B_H(e) = \sum_{s,t \in \mathcal{V}, s \neq t} \frac{\sigma_{st}(e)}{\sigma_{st}}
-\end{equation}
-where $\sigma_{st}$ is the number of shortest-cost paths. This weighted definition restores a heterogeneous, power-law distribution of centrality, providing a meaningful measure of team influence .
-
-Why Betweenness Centrality Matters More Than Degree Centrality Here
-First, it's important to clarify that your model is a co-authorship network, where authors are nodes and papers are hyperedges. This is different from a basic citation network, where nodes are papers.
-
-In your co-authorship model, betweenness centrality and degree centrality measure fundamentally different things and answer different questions.
-
-1. What Each Metric Measures in Your Example
-Hyperdegree Centrality (Degree Centrality)
-This measures the number of collaborations an individual author is involved in. It is a local measure of an author's activity or collaborative breadth. In your example:
-
-Node 2 is the most degree-central author with a hyperdegree of 3.
-
-This tells us that Author 2 is the most active collaborator.
-
-Hyperedge Betweenness Centrality (h-BC)
-This measures how often a team (i.e., a paper) lies on the most efficient paths for information to flow between all pairs of authors in the network. It is a global measure of a collaboration's importance as a bridge.
-
-In your example, the team $h_2=1,4,5$ is the most central.
-
-2. Why Not Just Use Degree Centrality?
-Knowing that Author 2 is the most active collaborator (highest degree) is useful, but it doesn't tell us which of their projects was the most impactful for the network's cohesion.
-
-It can't distinguish team importance: Does Author 2's presence make team $h_0, h_1, or h_4$ the most important bridge? Degree centrality alone cannot answer this. It assigns importance to the person, not the project.
-
-It's a poor proxy for bridge-like roles: A high-degree node might connect many people who are already well-connected to each other. This makes the node an active hub, but not necessarily a critical bridge between otherwise disconnected communities.
-
-3. Why Betweenness Centrality is the Right Tool for This Question
-Science and collaboration are not just about individual activity; they are about the synthesis and transfer of ideas between different groups. Betweenness centrality is the only measure that directly quantifies this role.
-
-In your specific example, betweenness centrality correctly identified that the collaboration $h_2=1,4,5$ is the most influential. Why?
-
-Because it serves as an essential intellectual bridge. Author 1 is from the orbit of team $h_0$, Author 4 is from team $h_1$, and Author 5 is from team $h_3$.
-
-The project $h_2$ is the one and only place where these three distinct research clusters are directly and efficiently linked.
-
-Degree centrality would have missed this completely. It would have pointed to Author 2, but it wouldn't have revealed that the specific project $h_2$ was the most critical event for the overall cohesion and information flow of the entire research community.
 % \section{Conclusion}
-% The hypergraph betweenness centrality provides a necessary and powerful extension to classical network theory. By accurately modeling group interactions and employing a weighted pathfinding approach, it successfully quantifies the influence of teams as single, cohesive entities. The framework reveals that team influence is a nuanced property, emerging from an interplay between the team's performance, its structural position as a bridge, and the connectivity of its individual members. This methodology offers a more realistic tool for analyzing a wide range of social, biological, and technological systems where collaboration is key.
-
+% The research presented provides a powerful narrative, moving from the abstract spectral properties of a network's adjacency matrix to a practical, effective strategy for control. The key insight is that the structural heterogeneity of a network, quantifiable via centrality measures, directly governs the energy required for its control. The concept of non-normality provides a unifying principle that resolves the conflict between competing energy metrics, leading to robust driver node selection strategies. This work elegantly demonstrates how deep concepts from graph theory are essential for solving complex problems in the engineering of networked systems.
 
 \section{Comparative Analysis and Synthesis}
-This is the most important section. Here, you don't just summarize; you analyze and connect the papers.
-\begin{itemize}
-    \item \textbf{Comparison of Methodologies:} How are the approaches in \textcite{key1}, \textcite{key2}, and \textcite{key3} similar or different? Do they use similar datasets or evaluation metrics?
-    \item \textbf{Comparison of Results:} Do the findings of the papers agree with or contradict each other? If they differ, why do you think that is? (e.g., different assumptions, datasets, methods).
-    \item \textbf{Common Themes:} What are the overarching themes or ideas that connect all three papers?
-    \item \textbf{Research Gaps:} Based on your reading, what questions are still unanswered? What are the limitations of the work presented in these papers? This synthesis can point towards future work.
-\end{itemize}
 
+This section provides a comparative analysis of the three papers, connecting their methodologies, results, and overarching themes to build a cohesive understanding of the relationship between network structure and function.
+
+\subsection{Comparison of Methodologies}
+The approaches in the three papers represent a clear progression from structural representation to dynamic analysis.
+\begin{itemize}
+    \item \textbf{Lee et al. (2021)} employs a primarily \textbf{combinatorial and structural} methodology. The core research here in this case is the re-definition of the network model itself from a standard graph to a hypergraph, which is then projected onto a bipartite graph. The analysis considers a common co-authorship model, and betweenness centrality as a metric, but here in this case, BC is applied to a group/ team setup, not on individual vertices
+
+    \item \textbf{Bof et al. (2017)} shifts the focus to \textbf{control theory and linear algebra}. It takes the standard graph representation (the adjacency matrix $A$) as given and uses it as a state space parameter for LTI systems. The metrics which are used are not path-based, but are derived from the system's Controllability Gramian and its $\lambda_{\min}(W)$, eigenspace of $A$.
+    
+    \item \textbf{Lindmark \& Altafini (2021)} builds directly on the  dynamical systems approach of \cite{Bof2017Role}. Its methodology is also rooted in control theory, using Gramians and $\mathcal{H}_2$ norms. Its primary innovation is the definition of novel centrality measures ($p_i, q_i$) derived directly from energy-based integrals, and using their imbalance to quantify the matrix property of non-normality.
+\end{itemize}
+In essence,\cite{Lee2021Betweenness} change the graph to better fit the problem, while \cite{Bof2017Role} \& \cite{Lindmark2021Centrality}apply a dynamic lens to analyze the standard graph structure.
+
+% \subsection{Comparison of Results}
+% The findings of the three papers are not contradictory; rather, they are complementary and build upon one another in a logical sequence, specially the papers build upon the notion of Controllability Gramian.
+% \begin{itemize}
+%     \item The result from \textbf{Lee et al.} that a team's influence is strongly correlated with a ``super leader'' (a member with high hyperdegree) highlights that certain nodes are structurally more important for the network's global connectivity.
+    
+%     \item The work of \textbf{Bof et al.} provides a dynamic consequence for this structural observation. It proves that a network with a high diversity of node importance (anisotropy, measured by eigenvector centrality) is energetically easier to control. The ``super leaders'' identified by Lee et al. are the nodes that create this beneficial anisotropy.
+    
+%     \item \textbf{Lindmark \& Altafini} provide the most refined perspective. They agree that influential nodes are important but show that a strategy based solely on influence is flawed. Their results demonstrate that the optimal strategy involves selecting nodes based on the \textit{imbalance} between their influence ($p_i$) and their own reachability ($q_i$). This explains why a ``super leader'' (high influence) who is also a root node (low reachability) is an ideal driver node.
+% \end{itemize}
+
+\subsection{Common Themes}
+Several overarching themes connect all three papers:
+\begin{enumerate}
+    \item \textbf{Beyond Local Metrics:} All three works argue that simple, local metrics like degree centrality  are insufficient for understanding complex network phenomena as discussed by \cite{Lee2021Betweenness}. They all propose more sophisticated, globally-aware measures: hypergraph betweenness centrality, eigenvector centrality, and energy-based non-normality metrics.
+    
+    \item \textbf{The Importance of Heterogeneity:} A central theme is that non-uniformity is not noise but a key feature. \cite{Bof2017Role} explicitly frame this as anisotropy. \cite{Lee2021Betweenness} observe it in the power-law distribution of influence driven by super leaders. \cite{Lindmark2021Centrality} leverage it via non-normality. In all cases, a heterogeneous, hierarchical structure has profound and often beneficial effects on the network's function.
+    
+    \item \textbf{Structure Dictates Dynamics:} This is the most fundamental theme. The static graph topology—who is connected to whom, and in what configuration—has direct, quantifiable consequences on dynamic processes like information flow and the energetic cost of control.
+\end{enumerate}
+
+\subsection{Research Gaps and Limitations}
+Despite their contributions, the papers point towards several open questions:
+\begin{itemize}
+    \item The models in Bof et al. and Lindmark \& Altafini are for Linear Time-Invariant (LTI) systems. A major challenge is extending these principles to the \textbf{non-linear dynamics} that govern many real-world biological and social systems.
+    \item The Bof et al. paper provides an upper bound on control energy and shows that isotropy makes networks hard to control. The full converse—whether high anisotropy \textit{guarantees} a network is easy to control—remains an open question.
+    \item All three analyses assume a complete and accurate knowledge of the network topology. A significant practical challenge is the analysis and control of networks with \textbf{incomplete, uncertain, or time-varying} data.
+\end{itemize}
 
 \section{Conclusion}
-Summarize the key points of your report.
-\begin{itemize}
-    \item \textbf{Summary of Analysis:} Briefly reiterate your main findings from the comparative analysis. What is the key takeaway from studying these three papers together?
-    \item \textbf{Broader Implications:} What are the broader implications of this research area?
-    \item \textbf{Future Directions:} Based on the identified research gaps, what are some interesting directions for future research in this field?
-\end{itemize}
+\subsection{Summary of Analysis}
+The progression across these three papers illustrates a clear intellectual journey. It begins with the need for better structural models to understand influence (hypergraphs), moves to linking network structure to dynamic properties like control energy (anisotropy), and culminates in a sophisticated principle (non-normality) that resolves a key practical dilemma in control strategy. The key takeaway is that effective network analysis requires moving beyond local, static metrics to global, dynamic, and often counter-intuitive principles that embrace the inherent heterogeneity of complex systems.
+
+\subsection{Broader Implications}
+The research has significant implications for the design and management of a wide range of real-world systems. The principles discussed can inform strategies for enhancing the robustness of communication networks and power grids, designing therapeutic interventions in biological networks by targeting key protein complexes, and understanding the flow of influence in social and economic networks.
+
+\subsection{Future Directions}
+Based on the identified gaps, interesting directions for future work include extending the energy-based control framework to non-linear dynamics, developing a more complete theory for the sufficiency of anisotropy in ensuring controllability, and creating new algorithms for network analysis and control that are robust to incomplete or noisy data.
 
 
 
